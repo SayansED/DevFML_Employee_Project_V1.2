@@ -131,18 +131,19 @@ public class CargosConsultar extends JPanel {
 	}
 
 	private void sqlPesquisarCargos(String nome) {
+		
+		// Validando campo
+		if(campoCargo.getText().length() <= 3) {
+			JOptionPane.showMessageDialog(null, "Por favor inserir o cargo");
+			return;
+		}
+		
 		// Conexao BD
 		Conexao conexao = new Conexao();
 		// Instrucao SQL
 		PreparedStatement preparedStatement = null;
 		// Resultados
 		ResultSet resultado = null;
-
-		// Validando campo
-		if(campoCargo.getText().length() <= 3) {
-			JOptionPane.showMessageDialog(null, "Por favor inserir o cargo");
-			return;
-		}
 
 		try {
 			String sqlSelect = "SELECT id,nome FROM T_CARGOS WHERE nome = ?;";
@@ -164,7 +165,7 @@ public class CargosConsultar extends JPanel {
 				JOptionPane.showMessageDialog(null, "Cargo não encontrado","Mensagem", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-			
+
 			Navegador.inicio();
 			resultado.close();
 			conexao.desconectar();

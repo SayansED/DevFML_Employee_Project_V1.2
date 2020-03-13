@@ -138,10 +138,23 @@ public class FuncionariosInserir extends JPanel {
     }
 
     private void sqlCarregarCargos() {  
-    	
+    	//Navegador.inicio();
     }
 
     private void sqlInserirFuncionario(Funcionario novoFuncionario) {
+    	
+    	if(campoNome.getText().isEmpty() || campoSobrenome.getText().isEmpty() || campoEmail.getText().isEmpty() || 
+    			campoCargo.getText().isEmpty() || campoId.getText().isEmpty() || campoDataNascimento.getText().isEmpty() || 
+    			campoSalario.getText().isEmpty()) {
+    		JOptionPane.showMessageDialog(null, "Preencha todos os campo", "Validação", JOptionPane.WARNING_MESSAGE);
+    		return;
+    	}
+    	
+    	// Validando Id
+    	if(campoId.getText().length() == 0 && campoId.getText().length() > 2) {
+    		JOptionPane.showMessageDialog(null, "Por favor, preencha o id corretamente.");
+    		return;
+    	}
         
         // validando nome
         if(campoNome.getText().length() <= 3){
@@ -193,11 +206,6 @@ public class FuncionariosInserir extends JPanel {
         ResultSet resultado = null;
         
         try {
-        	// Validando nome
-    		if(campoNome.getText().length() <= 3) {
-    			JOptionPane.showMessageDialog(null, "Por favor inserir o nome completo");
-    			return;
-    		}
     		String idFuncionario = campoId.getText();
     		funcionario.setId(idFuncionario);
     		String nomeFuncionario = campoNome.getText();
@@ -232,6 +240,7 @@ public class FuncionariosInserir extends JPanel {
 				JOptionPane.showMessageDialog(null, message, "Cadastro",JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				JOptionPane.showMessageDialog(null, "Funcionário não inserido");
+				return;
 			}
             
 			conexao.desconectar();

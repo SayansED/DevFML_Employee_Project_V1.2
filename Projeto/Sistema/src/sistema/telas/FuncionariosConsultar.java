@@ -82,6 +82,8 @@ public class FuncionariosConsultar extends JPanel {
 		botaoPesquisar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if(campoFuncionario.getText().isEmpty())
+					JOptionPane.showMessageDialog(null, "Preencha o campo", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
 				sqlPesquisarFuncionarios(campoFuncionario.getText());
 			}
 		});
@@ -98,6 +100,11 @@ public class FuncionariosConsultar extends JPanel {
 		botaoExcluir.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// Validando campo e nome
+				if(campoFuncionario.getText().isEmpty() || campoFuncionario.getText().length() <= 3) {
+					JOptionPane.showMessageDialog(null, "Preencha o campo corretamente", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
 				sqlDeletarFuncionario();
 			}
 		});
@@ -119,6 +126,12 @@ public class FuncionariosConsultar extends JPanel {
 
 	private void sqlPesquisarFuncionarios(String nome) {
 
+		// Validando campo
+		if(campoFuncionario.getText().length() <= 3) {
+			JOptionPane.showMessageDialog(null, "Por favor inserir o Funcionário correto");
+			return;
+		}
+
 		// Conexão
 		//Connection conexao;
 		Conexao conexao = new Conexao();
@@ -137,18 +150,25 @@ public class FuncionariosConsultar extends JPanel {
 			System.out.println("Sucesso");
 			resultado = preparedStatement.executeQuery();
 
-			while (resultado.next()) {
+			if (resultado.next()) {
+				// Next == true "Encontoru os dados"
 				JOptionPane.showMessageDialog(null, "Consulta realizado com sucesso", "Consulta", JOptionPane.INFORMATION_MESSAGE);
-				JOptionPane.showMessageDialog(null, "Funcionários" + "\n"
-						+ "Id: " + resultado.getString("id") + "\n"
-						+ "Nome: " + resultado.getString("nome") + "\n" 
-						+ "Sobrenome: " + resultado.getString("sobrenome") + "\n"
-						+ "Data de Nascimento: " + resultado.getString("dataNascimento") + "\n"
-						+ "Email: " + resultado.getString("email") + "\n"
-						+ "Cargo: " + resultado.getString("cargo") + "\n"
-						+ "Salário: " + resultado.getString("salario"));
+				do {
+					JOptionPane.showMessageDialog(null, "Funcionários" + "\n"
+							+ "Id: " + resultado.getString("id") + "\n"
+							+ "Nome: " + resultado.getString("nome") + "\n" 
+							+ "Sobrenome: " + resultado.getString("sobrenome") + "\n"
+							+ "Data de Nascimento: " + resultado.getString("dataNascimento") + "\n"
+							+ "Email: " + resultado.getString("email") + "\n"
+							+ "Cargo: " + resultado.getString("cargo") + "\n"
+							+ "Salário: " + resultado.getString("salario"));
+				} while(resultado.next());
+			} else {
+				// Next == false
+				JOptionPane.showMessageDialog(null, "Funcionário não encontrado","Mensagem", JOptionPane.INFORMATION_MESSAGE);
+				Navegador.inicio();
 			}
-			
+
 			Navegador.inicio();
 			resultado.close();
 			conexao.desconectar();
@@ -181,7 +201,7 @@ public class FuncionariosConsultar extends JPanel {
 			// Instrução SQL
 			Statement statement;
 			// Resultados
-			ResultSet resultados = null;
+			int resultado;
 
 			try {
 
@@ -192,16 +212,16 @@ public class FuncionariosConsultar extends JPanel {
 				String sqlDelete = "DELETE FROM T_FUNCIONARIOS WHERE nome=?;";
 				PreparedStatement preparedStatement = conexao.criarPreparedStatement(sqlDelete);
 				preparedStatement.setString(1, nomeFuncionario);
-				int resultado = preparedStatement.executeUpdate();
+				resultado = preparedStatement.executeUpdate();
 				if (resultado == 1) {
 					String  message = String.format("Funcionário: %s\nDeletado com sucesso", nomeFuncionario);
 					JOptionPane.showMessageDialog(null, message, "Excluir",JOptionPane.INFORMATION_MESSAGE);
 				} else {
-					JOptionPane.showMessageDialog(null, "Funcionário não deletado");
+					JOptionPane.showMessageDialog(null, "Funcionário não encontrado");
+					Navegador.inicio();
 				}
-				
+
 				Navegador.inicio();
-				resultados.close();
 				conexao.desconectar();
 
 			} catch (SQLException ex) {
@@ -210,5 +230,7 @@ public class FuncionariosConsultar extends JPanel {
 				Logger.getLogger(FuncionariosInserir.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		Navegador.inicio();
+		return;
 	}
 }
