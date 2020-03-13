@@ -118,6 +118,7 @@ public class FuncionariosEditar extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
             	Funcionario funcionario = new Funcionario();
+            	// Passando valores
             	funcionario.setId(campoId.getText());
                 funcionario.setNome(campoNome.getText());
                 funcionario.setSobrenome(campoSobrenome.getText());
@@ -125,6 +126,8 @@ public class FuncionariosEditar extends JPanel {
                 funcionario.setEmail(campoEmail.getText());
                 funcionario.setCargo(campoCargo.getText());
                 funcionario.setSalario(campoSalario.getText());
+                // Validando campos
+                
                 sqlAtualizarFuncionario();
                 System.out.println("Alterou: " + funcionario.getNome());
             }

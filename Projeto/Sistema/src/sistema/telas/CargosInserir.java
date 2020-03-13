@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import sqlite.Conexao;
 import sqlite.CriarBancoDeDados;
+import sistema.Navegador;
 import sistema.entidades.Cargo;
 
 public class CargosInserir extends JPanel {
@@ -41,7 +42,7 @@ public class CargosInserir extends JPanel {
 		labelIdCargo.setBounds(150, 180, 400, 20);
 		campoIdCargo.setBounds(150, 200, 400, 40);
 		botaoGravar.setBounds(250, 380, 200, 40);
-		
+
 		//campoIdCargo.enable(false);;
 
 		add(labelTitulo);
@@ -61,51 +62,57 @@ public class CargosInserir extends JPanel {
 				Cargo novoCargo = new Cargo();
 				novoCargo.setNome(campoNomeCargo.getText());
 				novoCargo.setId(campoIdCargo.getText());
-
+				// Validando campo
+				if (campoNomeCargo.getText().isEmpty() || campoIdCargo.getText().isEmpty()) 
+					JOptionPane.showMessageDialog(null, "Preencha todos os campo", "Validação", JOptionPane.WARNING_MESSAGE);
 				sqlInserirCargo(novoCargo);
-				campoNomeCargo.setText("");
-				campoIdCargo.setText("");
 			}
 		});
 	}
 
 	private void sqlInserirCargo(Cargo novoCargo) {
-		
 		Conexao conexao = new Conexao();
 		PreparedStatement preparedStatement = null;
 		CriarBancoDeDados criarBancoDeDados = new CriarBancoDeDados(conexao);
 		Cargo cargo = new Cargo();
-		
+
 		// Validando nome
 		if(campoNomeCargo.getText().length() <= 3) {
 			JOptionPane.showMessageDialog(null, "Por favor inserir o nome completo");
 			return;
 		}
-		
+		// Validando id
+		else if(campoIdCargo.getText().length() == 0) {
+			JOptionPane.showMessageDialog(null, "Por favor inserir o Id");
+			return;
+		}
+
 		try {
 			// SQLite	
 			String nomeCargo = campoNomeCargo.getText();
 			cargo.setNome(nomeCargo);
 			String idCargo = campoIdCargo.getText();
 			cargo.setId(idCargo);
-			
+
 			conexao.conectar();
 			String sqlInsert = "INSERT INTO T_CARGOS (id, nome) VALUES(?,?);";
 			preparedStatement = conexao.criarPreparedStatement(sqlInsert);
-			
+
 			preparedStatement.setString(1, cargo.getId());
 			preparedStatement.setString(2, cargo.getNome());
-			
+
 			int resultado = preparedStatement.executeUpdate();
 			if (resultado == 1) {
 				String  message = String.format("Cargo: %s\nCadastrado com sucesso", nomeCargo);
 				JOptionPane.showMessageDialog(null, message, "Cadastro",JOptionPane.INFORMATION_MESSAGE);
 			} else {
 				JOptionPane.showMessageDialog(null, "Cargo não inserido");
+				return;
 			}
-			
+
+			Navegador.inicio();
 			conexao.desconectar();
-			
+
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar", "ERRO", JOptionPane.ERROR_MESSAGE);

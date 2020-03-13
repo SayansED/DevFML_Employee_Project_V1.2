@@ -87,6 +87,8 @@ public class CargosConsultar extends JPanel {
 		botaoPesquisar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if(campoCargo.getText().isEmpty())
+					JOptionPane.showMessageDialog(null, "Preencha o campo", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
 				sqlPesquisarCargos(campoCargo.getText());
 			}
 		});
@@ -103,6 +105,11 @@ public class CargosConsultar extends JPanel {
 		botaoExcluir.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// Validando campo e nome
+				if(campoCargo.getText().isEmpty() || campoCargo.getText().length() <= 3) {
+					JOptionPane.showMessageDialog(null, "Preencha o campo corretamente", "Mensagem", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
 				sqlDeletarCargo();
 			}
 		});
@@ -131,23 +138,33 @@ public class CargosConsultar extends JPanel {
 		// Resultados
 		ResultSet resultado = null;
 
+		// Validando campo
+		if(campoCargo.getText().length() <= 3) {
+			JOptionPane.showMessageDialog(null, "Por favor inserir o cargo");
+			return;
+		}
+
 		try {
 			String sqlSelect = "SELECT id,nome FROM T_CARGOS WHERE nome = ?;";
 			conexao.conectar();
 			preparedStatement = conexao.criarPreparedStatement(sqlSelect);
 			preparedStatement.setString(1, nome);
-			System.out.println("Sucesso");
 			resultado = preparedStatement.executeQuery();
 
-
-
-			while (resultado.next()) {                
+			if(resultado.next()){
+				// Next == true "Encontoru os dados"
 				JOptionPane.showMessageDialog(null, "Consulta realizado com sucesso", "Consulta", JOptionPane.INFORMATION_MESSAGE);
-				JOptionPane.showMessageDialog(null, "Cargos" + "\n"
-						+ "Id: " + resultado.getString("id") + "\n"
-						+ "Nome: " + resultado.getString("nome"));
+				do{
+					JOptionPane.showMessageDialog(null, "Cargos" + "\n"
+							+ "Id: " + resultado.getString("id") + "\n"
+							+ "Nome: " + resultado.getString("nome"));
+				}while(resultado.next());
+			}else{
+				// Next == false
+				JOptionPane.showMessageDialog(null, "Cargo não encontrado","Mensagem", JOptionPane.INFORMATION_MESSAGE);
+				return;
 			}
-
+			
 			Navegador.inicio();
 			resultado.close();
 			conexao.desconectar();
@@ -169,10 +186,8 @@ public class CargosConsultar extends JPanel {
 	}
 
 	private void sqlDeletarCargo() {
-
 		int confirmacao = JOptionPane.showConfirmDialog(null, "Deseja realmente excluir o Cargo " + campoCargo.getText() + "?", "Excluir", JOptionPane.YES_NO_OPTION);
-		if(confirmacao == JOptionPane.YES_OPTION){
-
+		if(confirmacao == JOptionPane.YES_OPTION) {
 			// conexão
 			Conexao conexao = new Conexao();
 			// instrucao SQL
@@ -195,8 +210,10 @@ public class CargosConsultar extends JPanel {
 					String  message = String.format("Cargo: %s\nDeletado com sucesso", nomeCargo);
 					JOptionPane.showMessageDialog(null, message, "Excluir",JOptionPane.INFORMATION_MESSAGE);
 				} else {
-					JOptionPane.showMessageDialog(null, "Cargo não deletado");
+					JOptionPane.showMessageDialog(null, "Cargo não encontrado");
+					return;
 				}
+
 				Navegador.inicio();
 				conexao.desconectar();
 
@@ -205,7 +222,8 @@ public class CargosConsultar extends JPanel {
 				JOptionPane.showMessageDialog(null, "Ocorreu um erro ao excluir o Cargo.");
 				Logger.getLogger(CargosInserir.class.getName()).log(Level.SEVERE, null, ex);
 			}
-
+			Navegador.inicio();
+			return;
 		}
 	}
 }
